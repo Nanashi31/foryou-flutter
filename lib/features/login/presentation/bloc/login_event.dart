@@ -17,3 +17,13 @@ class LoginButtonPressed extends LoginEvent {
   @override
   List<Object> get props => [email, password];
 }
+
+/// Evento que se dispara cuando el usuario solicita un enlace de inicio de sesión OTP.
+class LoginWithOtpRequested extends LoginEvent {
+  final String email;
+
+  const LoginWithOtpRequested({required this.email});
+
+  @override
+  List<Object> get props => [email];
+}

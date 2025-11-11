@@ -28,3 +28,6 @@ class LoginFailure extends LoginState {
   @override
   List<Object> get props => [error];
 }
+
+/// Estado que indica que el enlace de inicio de sesión OTP ha sido enviado.
+class LoginOtpLinkSent extends LoginState {}

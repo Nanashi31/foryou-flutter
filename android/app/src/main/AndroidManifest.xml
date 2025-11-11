@@ -29,10 +29,10 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accepts URIs that begin with YOUR_SCHEME://YOUR_HOST -->
+                <!-- Accepts URIs that begin with foryou.app://auth-callback -->
                 <data
-                android:scheme="com.miguelitos.app_foryou"
-                android:host="login-callback" />
+                android:scheme="foryou.app"
+                android:host="auth-callback" />
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
