@@ -1,91 +1,104 @@
-# =========================
-# Flutter / Dart
-# =========================
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
 
-# Herramientas y metadatos de Dart/Flutter (carpeta de trabajo local)
-.dart_tool/                # Directorio de herramientas internas de Dart
-.packages                  # Mapa de paquetes (obsoleto desde Dart 2.19+, igual se ignora)
-.flutter-plugins           # Plugins detectados por Flutter
-.flutter-plugins-dependencies
-.metadata                  # Info local del proyecto
-
-# Salidas de compilación
-build/                     # Artefactos de build (app, web, desktop)
-coverage/                  # Reportes de cobertura generados localmente
-
-# Documentación generada por dartdoc
-**/doc/api/                # API docs generados (no versionar)
-
-# =========================
-# IDEs
-# =========================
-.idea/                     # IntelliJ / Android Studio
+# IntelliJ related
 *.iml
-.vscode/                   # VS Code configs de usuario (no del proyecto)
-*.swp                      # Vim swaps, por si acaso
+*.ipr
+*.iws
+.idea/
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/assetWizardSettings.xml
+.idea/dictionaries
+.idea/libraries
+.idea/caches
 
-# =========================
-# SO / Archivos generales
-# =========================
-.DS_Store                  # macOS
-Thumbs.db                  # Windows
-.svn/                      # SVN leftovers
-*.log                      # Logs en general
-*.tmp                      # Temporales
+# Visual Studio Code related
+.vscode/
+.classpath
+.project
+.settings/
+.ccls-cache
 
-# =========================
-# Android
-# =========================
-**/android/.gradle/        # Cache Gradle
-**/android/local.properties# Rutas locales del SDK
-**/android/key.properties  # Keystore config (sensible, cada dev lo tiene local)
-**/android/app/debug/
-**/android/app/profile/
-**/android/app/release/    # Carpeta de builds por flavor
-
-# Archivos de registro PluginRegistrant generados en build (no versionar)
-**/android/**/GeneratedPluginRegistrant.java
-**/android/**/GeneratedPluginRegistrant.kt
-
-# =========================
-# iOS / macOS
-# =========================
-**/ios/.symlinks/          # Enlaces a Pods
-**/ios/Pods/               # Dependencias CocoaPods (se pueden regenerar)
-**/ios/Runner.xcworkspace/ # Workspace generado por CocoaPods
-**/ios/Flutter/.last_build_id
-**/ios/Flutter/ephemeral/  # Archivos efímeros
-
-# Config generada
-**/ios/Flutter/Generated.xcconfig
-**/macos/Flutter/ephemeral/
-**/macos/Pods/
-**/macos/Runner.xcworkspace/
-
-# =========================
-# Windows / Linux / Web
-# =========================
-**/windows/flutter/ephemeral/
-**/windows/runner/Debug/
-**/windows/runner/Profile/
-**/windows/runner/Release/
-**/linux/flutter/ephemeral/
-
-# =========================
-# Archivos de servicios (opcionales)
-# =========================
-# Firebase (mantén fuera del repo si compartes públicamente)
-**/google-services.json
-**/GoogleService-Info.plist
-
-# Variables de entorno (usa .env.example para compartir nombres)
-.env
-.env.*
-
-# =========================
-# Notas sobre pubspec.lock
-# =========================
-# Para APPS: se recomienda COMMIT del pubspec.lock (reproducibilidad).
-# Para PACKAGES (librerías publicables): se suele IGNORAR.
-# Por defecto NO lo ignoramos. Si estás creando un package, descomenta:
+# Flutter/Dart/Pub related
+**/doc/api/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+flutter_*.png
+linked_*.ds
+unlinked.ds
+unlinked_spec.ds
+# If you're building an application, you may want to check-in your pubspec.lock.
 # pubspec.lock
+
+# Android related
+*.apk
+*.ap_
+bin/
+gen/
+out/
+.gradle/
+build/
+local.properties
+proguard/
+.navigation/
+captures/
+.externalNativeBuild/
+google-services.json
+**/android/**/gradle-wrapper.jar
+**/android/.gradle
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+**/android/key.properties
+*.jks
+
+# iOS/Xcode related
+**/ios/**/*.mode1v3
+**/ios/**/*.mode2v3
+**/ios/**/*.moved-aside
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/*sync/
+**/ios/**/.sconsign.dblite
+**/ios/**/.tags*
+**/ios/**/.vagrant/
+**/ios/**/DerivedData/
+**/ios/**/Icon?
+**/ios/**/Pods/
+**/ios/**/.symlinks/
+**/ios/**/profile
+**/ios/**/xcuserdata
+**/ios/.generated/
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+
+# Exceptions to above rules (if any specific files need to be tracked despite general rules)
+# !**/ios/**/default.mode1v3
+# !**/ios/**/default.mode2v3
+# !**/ios/**/default.pbxuser
+# !**/ios/**/default.perspectivev3

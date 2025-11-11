@@ -7,12 +7,13 @@ abstract class LoginEvent extends Equatable {
   List<Object> get props => [];
 }
 
+/// Evento que se dispara cuando el usuario presiona el botón de iniciar sesión.
 class LoginButtonPressed extends LoginEvent {
-  final String username;
+  final String email; // Cambiado de 'username' a 'email'.
   final String password;
 
-  const LoginButtonPressed({required this.username, required this.password});
+  const LoginButtonPressed({required this.email, required this.password});
 
   @override
-  List<Object> get props => [username, password];
+  List<Object> get props => [email, password];
 }

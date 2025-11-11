@@ -1,5 +1,7 @@
 import 'package:app_foryou/features/login/domain/entities/client.dart';
 
+/// Abstracción del repositorio para el login.
+/// Define el contrato que la capa de datos debe implementar.
 abstract class LoginRepository {
-  Future<Client> login(String username, String password);
+  Future<Client> login(String email, String password);
 }
