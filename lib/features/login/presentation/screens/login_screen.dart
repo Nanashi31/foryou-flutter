@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:app_foryou/features/login/presentation/bloc/login_bloc.dart';
+import 'package:app_foryou/features/login/presentation/screens/login_success_screen.dart';
 
 /// Pantalla de inicio de sesión.
 /// Contiene un formulario para email y contraseña.
@@ -39,9 +40,13 @@ class LoginScreenState extends State<LoginScreen> {
                 backgroundColor: Theme.of(context).colorScheme.error,
               ),
             );
+          } else if (state is LoginSuccess) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => const LoginSuccessScreen(),
+              ),
+            );
           }
-          // Ya no necesitamos manejar LoginSuccess aquí. El StreamBuilder en main.dart
-          // se encargará de la navegación a la HomePage automáticamente.
         },
         builder: (context, state) {
           // Si el estado es de carga, mostramos un indicador de progreso.

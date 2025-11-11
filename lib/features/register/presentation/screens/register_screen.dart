@@ -19,15 +19,19 @@ class RegisterScreen extends StatelessWidget {
       body: BlocConsumer<RegisterBloc, RegisterState>(
         listener: (context, state) {
           if (state is RegisterSuccess) {
-            // En caso de éxito, mostramos un mensaje de confirmación.
+            // En caso de éxito, mostramos un mensaje claro indicando que
+            // se ha enviado un correo de verificación.
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('¡Registro exitoso! Por favor, inicia sesión.'),
+                content: Text(
+                  'Registrado correctamente',
+                ),
                 backgroundColor: Colors.green,
+                duration: Duration(seconds: 5), 
               ),
             );
-            // Y luego, enviamos al usuario de vuelta a la pantalla de login.
-            // Usamos popAndPushNamed para reemplazar la pantalla actual por la de login.
+            // Navegamos a la pantalla de login para que el usuario inicie sesión
+            // una vez que haya verificado su correo.
             Navigator.of(context).popAndPushNamed('/login');
           } else if (state is RegisterFailure) {
             // En caso de fallo, mostramos el error.
