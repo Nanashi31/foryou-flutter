@@ -1,0 +1,40 @@
+Genera la estructura de código para la funcionalidad de Login de **Clientes** en un proyecto Flutter llamado 'foryou', siguiendo los principios de Clean Architecture.
+
+La pantalla de Login debe tener dos campos:
+1.  **Username**: Mapea al campo `usuario` de la base de datos.
+2.  **Password**: Mapea al campo `password_hash` de la base de datos.
+
+El flujo debe estar separado en tres capas: Presentación, Dominio y Datos.
+
+**1. Capa de Presentación (Presentation):**
+* Crea el Widget de la pantalla de Login (`features/login/presentation/screens/login_screen.dart`).
+* Utiliza `TextFormField` para 'username' y 'password'.
+* Añade validación de UI: los campos no deben estar vacíos.
+* Implementa un gestor de estado (BLoC) (`features/login/presentation/bloc/login_bloc.dart`) para manejar los estados: `LoginInitial`, `LoginLoading`, `LoginSuccess` (que contenga la entidad `Client`) y `LoginFailure` (que contenga un mensaje de error).
+
+**2. Capa de Dominio (Domain):**
+* Crea la entidad `Client` (`features/login/domain/entities/client.dart`). Esta entidad debe exponer la información *segura* del cliente: `id_cliente`, `nombre`, `usuario` y `correo`. **No debe exponer el `password_hash`**.
+* Define el contrato del repositorio (`features/login/domain/repositories/login_repository.dart`) con un método: `Future<Client> login(String username, String password)`.
+* Crea el caso de uso `LoginClientUseCase` (`features/login/domain/usecases/login_client_usecase.dart`).
+* El caso de uso debe:
+    * Depender del `LoginRepository`.
+    * Implementar la lógica de negocio de validación: verificar que el `password` tenga una longitud mínima (ej. 8 caracteres) antes de intentar enviarlo.
+
+**3. Capa de Datos (Data):**
+* Crea el `ClientModel` (`features/login/data/models/client_model.dart`) que **extiende** la entidad `Client`.
+* Este modelo debe incluir **todos** los campos de la tabla `clientes` y los métodos `fromJson` y `toJson` para la serialización desde la API.
+* Crea la implementación del repositorio (`features/login/data/repositories/login_repository_impl.dart`) que implemente `LoginRepository`.
+* Define el `LoginDataSource` (`features/login/data/datasources/login_remote_datasource.dart`) (abstracto y su implementación) que hará la llamada a la API REST (ej. un POST a `/api/login/client` enviando `usuario` y `password`).
+
+**Contexto de la Base de Datos (Tabla `clientes`):**
+A continuación se muestra el esquema exacto de la tabla `clientes` para definir la entidad y el modelo:
+```sql
+CREATE TABLE `clientes` (
+  `id_cliente` int(10) UNSIGNED NOT NULL,
+  `nombre` varchar(255) NOT NULL,
+  `usuario` varchar(50) DEFAULT NULL,
+  `password_hash` varchar(95) NOT NULL,
+  `telefono` varchar(20) DEFAULT NULL,
+  `domicilio` varchar(255) DEFAULT NULL,
+  `correo` varchar(255) DEFAULT NULL
+);
