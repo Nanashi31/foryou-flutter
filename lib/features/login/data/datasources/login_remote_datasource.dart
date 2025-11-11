@@ -7,12 +7,29 @@ abstract class LoginRemoteDataSource {
   /// Devuelve un [ClientModel] en caso de éxito.
   /// Lanza una [Exception] en caso de fallo.
   Future<ClientModel> login(String email, String password);
+
+  /// Envía un enlace de inicio de sesión (OTP) al correo electrónico del usuario.
+  Future<void> signInWithOtp(String email);
 }
 
 // Implementación del origen de datos remoto que utiliza Supabase.
 class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
   // Ya no necesitamos http.Client, ahora usamos el cliente global de Supabase.
   final _supabase = Supabase.instance.client;
+
+  @override
+  Future<void> signInWithOtp(String email) async {
+    try {
+      await _supabase.auth.signInWithOtp(
+        email: email,
+        emailRedirectTo: 'foryou.app://auth-callback/',
+      );
+    } on AuthException catch (e) {
+      throw Exception('Error al enviar el enlace de inicio de sesión: ${e.message}');
+    } catch (e) {
+      throw Exception('Ocurrió un error inesperado: ${e.toString()}');
+    }
+  }
 
   @override
   Future<ClientModel> login(String email, String password) async {

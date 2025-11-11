@@ -46,6 +46,13 @@ class LoginScreenState extends State<LoginScreen> {
                 builder: (_) => const LoginSuccessScreen(),
               ),
             );
+          } else if (state is LoginOtpLinkSent) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('¡Enlace de inicio de sesión enviado! Revisa tu correo.'),
+                backgroundColor: Colors.green,
+              ),
+            );
           }
         },
         builder: (context, state) {
@@ -113,7 +120,27 @@ class LoginScreenState extends State<LoginScreen> {
                         Navigator.pushNamed(context, '/register');
                       },
                       child: const Text('¿No tienes cuenta? Regístrate'),
-                    )
+                    ),
+                    const SizedBox(height: 8.0),
+                    TextButton(
+                      onPressed: () {
+                        // Solo validamos el campo de email para esta acción.
+                        if (_emailController.text.isNotEmpty && _emailController.text.contains('@')) {
+                          context.read<LoginBloc>().add(
+                                LoginWithOtpRequested(email: _emailController.text),
+                              );
+                        } else {
+                          // Mostramos un error si el email no es válido.
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text('Por favor, introduce un email válido para recibir el enlace.'),
+                              backgroundColor: Theme.of(context).colorScheme.error,
+                            ),
+                          );
+                        }
+                      },
+                      child: const Text('O inicia sesión con un enlace mágico'),
+                    ),
                   ],
                 ),
               ),

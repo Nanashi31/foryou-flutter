@@ -1,8 +1,13 @@
 import 'package:app_foryou/core/config/supabase_config.dart';
+import 'package:app_foryou/features/home/data/datasources/profile_remote_datasource.dart';
+import 'package:app_foryou/features/home/data/repositories/profile_repository_impl.dart';
+import 'package:app_foryou/features/home/domain/usecases/get_profile_usecase.dart';
+import 'package:app_foryou/features/home/presentation/bloc/profile_bloc.dart';
 import 'package:app_foryou/features/home/presentation/home_page.dart';
 import 'package:app_foryou/features/login/data/datasources/login_remote_datasource.dart';
 import 'package:app_foryou/features/login/data/repositories/login_repository_impl.dart';
 import 'package:app_foryou/features/login/domain/usecases/login_client_usecase.dart';
+import 'package:app_foryou/features/login/domain/usecases/login_with_otp_usecase.dart';
 import 'package:app_foryou/features/login/presentation/bloc/login_bloc.dart';
 import 'package:app_foryou/features/login/presentation/screens/email_verification_screen.dart';
 import 'package:app_foryou/features/login/presentation/screens/login_screen.dart';
@@ -21,12 +26,9 @@ import 'package:app_foryou/core/data/local/app_database.dart';
 // Punto de entrada principal de la aplicación.
 Future<void> main() async {
   // 1. Asegura que los bindings de Flutter estén inicializados.
-  // Es necesario para poder llamar a código nativo antes de runApp().
   WidgetsFlutterBinding.ensureInitialized();
 
   // 2. Inicializa Supabase.
-  // Aquí configuramos el cliente de Supabase con la URL y la clave anónima.
-  // Usamos la clase `SupabaseConfig` para mantener las credenciales centralizadas.
   await Supabase.initialize(
     url: SupabaseConfig.supabaseUrl,
     anonKey: SupabaseConfig.supabaseAnonKey,
@@ -37,10 +39,6 @@ Future<void> main() async {
 }
 
 /// Cliente global de Supabase para un fácil acceso en toda la app.
-///
-/// Esta instancia nos permite interactuar con Supabase Auth, Database, etc.
-/// desde cualquier parte de la aplicación sin tener que pasar la instancia
-/// manualmente.
 final supabase = Supabase.instance.client;
 
 /// Widget raíz de la aplicación.
@@ -50,18 +48,19 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Usamos MultiBlocProvider para proveer todos los Blocs a la aplicación.
-    // Esto centraliza la inyección de dependencias de los Blocs.
     return MultiBlocProvider(
       providers: [
         // Proveedor para el Bloc de Login.
         BlocProvider<LoginBloc>(
-          create: (context) => LoginBloc(
-            loginClientUseCase: LoginClientUseCase(
-              LoginRepositoryImpl(
-                remoteDataSource: LoginRemoteDataSourceImpl(),
-              ),
-            ),
-          ),
+          create: (context) {
+            final loginRepository = LoginRepositoryImpl(
+              remoteDataSource: LoginRemoteDataSourceImpl(),
+            );
+            return LoginBloc(
+              loginClientUseCase: LoginClientUseCase(loginRepository),
+              loginWithOtpUseCase: LoginWithOtpUseCase(loginRepository),
+            );
+          },
         ),
         // Proveedor para el Bloc de Registro.
         BlocProvider<RegisterBloc>(
@@ -76,6 +75,16 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
+        // Proveedor para el Bloc de Perfil.
+        BlocProvider<ProfileBloc>(
+          create: (context) => ProfileBloc(
+            getProfileUseCase: GetProfileUseCase(
+              ProfileRepositoryImpl(
+                remoteDataSource: ProfileRemoteDataSourceImpl(),
+              ),
+            ),
+          ),
+        ),
       ],
       child: MaterialApp(
         title: 'ForYou App',
@@ -83,9 +92,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        // 4. Selección de la pantalla inicial basada en el estado de autenticación.
-        // Usamos un StreamBuilder que escucha los cambios en el estado de
-        // autenticación de Supabase (`onAuthStateChange`).
+        // Selección de la pantalla inicial basada en el estado de autenticación.
         home: StreamBuilder<AuthState>(
           stream: supabase.auth.onAuthStateChange,
           builder: (context, snapshot) {
@@ -97,7 +104,7 @@ class MyApp extends StatelessWidget {
             if (session != null) {
               return const HomePage();
             } else {
-              return const EmailVerificationScreen();
+              return const LoginScreen();
             }
           },
         ),
@@ -105,6 +112,7 @@ class MyApp extends StatelessWidget {
           '/login': (context) => const LoginScreen(),
           '/register': (context) => const RegisterScreen(),
           '/home': (context) => const HomePage(),
+          '/verify-email': (context) => const EmailVerificationScreen(),
         },
       ),
     );

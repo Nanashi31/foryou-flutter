@@ -1,4 +1,6 @@
+import 'package:app_foryou/features/home/presentation/bloc/profile_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Pantalla principal que se muestra solo a usuarios autenticados.
@@ -11,15 +13,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final _supabase = Supabase.instance.client;
-  User? _user;
-
   @override
   void initState() {
     super.initState();
-    // Obtenemos la información del usuario actual al iniciar la pantalla.
-    // Esto es seguro porque esta pantalla solo es accesible si hay una sesión activa.
-    _user = _supabase.auth.currentUser;
+    // Al iniciar la pantalla, solicitamos al Bloc que cargue el perfil.
+    context.read<ProfileBloc>().add(ProfileFetched());
   }
 
   @override
@@ -28,23 +26,16 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Página Principal'),
         actions: [
-          // Añadimos un botón de cierre de sesión directamente en la AppBar.
+          // Botón de cierre de sesión.
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Cerrar Sesión',
             onPressed: () async {
-              // Lógica para cerrar sesión.
               try {
-                // `signOut` elimina la sesión local del usuario y revoca el token
-                // de acceso en el servidor de Supabase.
-                await _supabase.auth.signOut();
-
-                // Una vez que `signOut` se completa, el StreamBuilder en `main.dart`
-                // que escucha `onAuthStateChange` detectará que la sesión es nula.
-                // Automáticamente, reconstruirá la UI y mostrará `LoginScreen`
-                // sin necesidad de navegación manual con `Navigator`.
+                // Al cerrar sesión, el StreamBuilder en main.dart se encargará
+                // de redirigir a la pantalla de Login.
+                await Supabase.instance.client.auth.signOut();
               } catch (e) {
-                // Manejo de errores en caso de que el cierre de sesión falle.
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('Error al cerrar sesión: ${e.toString()}'),
@@ -56,22 +47,43 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              // Mostramos el email del usuario si está disponible.
-              '¡Bienvenido!',
-              style: Theme.of(context).textTheme.headlineLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _user?.email ?? 'No se pudo cargar el email',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-          ],
-        ),
+      body: BlocBuilder<ProfileBloc, ProfileState>(
+        builder: (context, state) {
+          // Mientras se carga el perfil, mostramos un indicador de progreso.
+          if (state is ProfileLoadInProgress || state is ProfileInitial) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          // Si la carga del perfil es exitosa, mostramos el nombre.
+          if (state is ProfileLoadSuccess) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '¡Bienvenido!',
+                    style: Theme.of(context).textTheme.headlineLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    state.profile.nombre, // Usamos el nombre del perfil.
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ],
+              ),
+            );
+          }
+          // Si hay un error, lo mostramos.
+          if (state is ProfileLoadFailure) {
+            return Center(
+              child: Text(
+                'Error al cargar el perfil: ${state.error}',
+                style: const TextStyle(color: Colors.red),
+              ),
+            );
+          }
+          // Estado por defecto (aunque no debería llegar aquí).
+          return const Center(child: Text('Por favor, espera...'));
+        },
       ),
     );
   }

@@ -10,6 +10,12 @@ class LoginRepositoryImpl implements LoginRepository {
   LoginRepositoryImpl({required this.remoteDataSource});
 
   @override
+  Future<void> signInWithOtp(String email) async {
+    // Pasa la llamada al origen de datos remoto.
+    await remoteDataSource.signInWithOtp(email);
+  }
+
+  @override
   Future<Client> login(String email, String password) async {
     // Simplemente pasa la llamada al origen de datos remoto.
     return await remoteDataSource.login(email, password);

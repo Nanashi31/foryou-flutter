@@ -19,20 +19,19 @@ class RegisterScreen extends StatelessWidget {
       body: BlocConsumer<RegisterBloc, RegisterState>(
         listener: (context, state) {
           if (state is RegisterSuccess) {
-            // En caso de éxito, mostramos un mensaje claro indicando que
-            // se ha enviado un correo de verificación.
+            // En caso de éxito, mostramos un mensaje claro y navegamos
+            // a la pantalla que le indica al usuario que verifique su correo.
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text(
-                  'Registrado correctamente',
+                  '¡Registro exitoso! Revisa tu correo para verificar tu cuenta.',
                 ),
                 backgroundColor: Colors.green,
-                duration: Duration(seconds: 5), 
+                duration: Duration(seconds: 5),
               ),
             );
-            // Navegamos a la pantalla de login para que el usuario inicie sesión
-            // una vez que haya verificado su correo.
-            Navigator.of(context).popAndPushNamed('/login');
+            // Navegamos a la pantalla de verificación.
+            Navigator.of(context).popAndPushNamed('/verify-email');
           } else if (state is RegisterFailure) {
             // En caso de fallo, mostramos el error.
             ScaffoldMessenger.of(context).showSnackBar(
@@ -100,6 +99,9 @@ class RegisterFormState extends State<RegisterForm> {
                 if (value == null || value.isEmpty) {
                   return 'Por favor, introduce tu nombre';
                 }
+                if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value)) {
+                  return 'El nombre solo puede contener letras y espacios';
+                }
                 return null;
               },
             ),
@@ -142,6 +144,9 @@ class RegisterFormState extends State<RegisterForm> {
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Por favor, introduce tu teléfono';
+                }
+                if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+                  return 'El teléfono solo puede contener números';
                 }
                 return null;
               },
