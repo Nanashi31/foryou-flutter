@@ -49,6 +49,8 @@ dependencies:
   path: ^1.9.1
   supabase_flutter: ^2.10.3
   flutter_dotenv: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.7
 
 dev_dependencies:
   flutter_test:
@@ -107,3 +109,17 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  image_path: "assets/icons/icono.jpg"
+
+flutter_native_splash:
+  android: true
+  ios: false
+  web: false
+  color: "#ffffff"
+  image: "assets/icons/splash.jpg"
+  android_12:
+    image: "assets/icons/splash.jpg"
+    color: "#ffffff"
