@@ -27,14 +27,32 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
       if (authResponse.user != null) {
         final user = authResponse.user!;
 
-        // Creamos una instancia de ClientModel a partir de los datos del usuario de Supabase.
-        // Como el login básico no nos da un "nombre", usamos la parte local del email como placeholder.
-        // En una app real, estos datos vendrían de una tabla de "perfiles".
-        return ClientModel(
-          idCliente: user.id, // Usamos el ID de Supabase como String.
-          nombre: user.email!.split('@').first, // Placeholder para el nombre.
-          correo: user.email, // Usamos el email de Supabase.
-        );
+        // **VERIFICACIÓN DE CORREO ELECTRÓNICO**
+        // Comprobamos si el correo del usuario ha sido verificado.
+        // `emailConfirmedAt` es una fecha en formato string si está confirmado,
+        // o `null` si no lo está.
+        if (user.emailConfirmedAt == null) {
+          // Si el correo no está confirmado, lanzamos una excepción
+          // para notificar al usuario.
+          // También es buena práctica cerrar la sesión que se acaba de abrir.
+          await _supabase.auth.signOut();
+          throw Exception(
+            'Por favor, verifica tu correo electrónico antes de iniciar sesión. '
+            'Revisa tu bandeja de entrada.',
+          );
+        }
+
+        // Si el correo está verificado, procedemos a obtener el perfil del cliente.
+        // Buscamos en la tabla 'clientes' el perfil que corresponde al ID del usuario.
+        final profileResponse = await _supabase
+            .from('clientes')
+            .select()
+            .eq('id_cliente', user.id)
+            .single(); // Usamos .single() para obtener un único registro.
+
+        // Devolvemos el perfil del cliente convertido a nuestro modelo.
+        return ClientModel.fromJson(profileResponse);
+        
       } else {
         // Si por alguna razón no hay un objeto User, lanzamos un error.
         throw Exception('Inicio de sesión fallido: no se recibieron datos del usuario.');
