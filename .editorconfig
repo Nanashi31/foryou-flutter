@@ -1,0 +1,18 @@
+# EditorConfig ayuda a mantener estilos consistentes
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Archivos de texto por defecto
+[*.{md,txt,json,yml,yaml,xml}]
+indent_style = space
+indent_size = 2
+
+# Dart/Flutter
+[*.{dart}]
+indent_style = space
+indent_size = 2

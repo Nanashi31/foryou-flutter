@@ -1,45 +1,91 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
+# =========================
+# Flutter / Dart
+# =========================
 
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
-.dart_tool/
+# Herramientas y metadatos de Dart/Flutter (carpeta de trabajo local)
+.dart_tool/                # Directorio de herramientas internas de Dart
+.packages                  # Mapa de paquetes (obsoleto desde Dart 2.19+, igual se ignora)
+.flutter-plugins           # Plugins detectados por Flutter
 .flutter-plugins-dependencies
-.pub-cache/
-.pub/
-/build/
-/coverage/
+.metadata                  # Info local del proyecto
 
-# Symbolication related
-app.*.symbols
+# Salidas de compilación
+build/                     # Artefactos de build (app, web, desktop)
+coverage/                  # Reportes de cobertura generados localmente
 
-# Obfuscation related
-app.*.map.json
+# Documentación generada por dartdoc
+**/doc/api/                # API docs generados (no versionar)
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# =========================
+# IDEs
+# =========================
+.idea/                     # IntelliJ / Android Studio
+*.iml
+.vscode/                   # VS Code configs de usuario (no del proyecto)
+*.swp                      # Vim swaps, por si acaso
+
+# =========================
+# SO / Archivos generales
+# =========================
+.DS_Store                  # macOS
+Thumbs.db                  # Windows
+.svn/                      # SVN leftovers
+*.log                      # Logs en general
+*.tmp                      # Temporales
+
+# =========================
+# Android
+# =========================
+**/android/.gradle/        # Cache Gradle
+**/android/local.properties# Rutas locales del SDK
+**/android/key.properties  # Keystore config (sensible, cada dev lo tiene local)
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/    # Carpeta de builds por flavor
+
+# Archivos de registro PluginRegistrant generados en build (no versionar)
+**/android/**/GeneratedPluginRegistrant.java
+**/android/**/GeneratedPluginRegistrant.kt
+
+# =========================
+# iOS / macOS
+# =========================
+**/ios/.symlinks/          # Enlaces a Pods
+**/ios/Pods/               # Dependencias CocoaPods (se pueden regenerar)
+**/ios/Runner.xcworkspace/ # Workspace generado por CocoaPods
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/ephemeral/  # Archivos efímeros
+
+# Config generada
+**/ios/Flutter/Generated.xcconfig
+**/macos/Flutter/ephemeral/
+**/macos/Pods/
+**/macos/Runner.xcworkspace/
+
+# =========================
+# Windows / Linux / Web
+# =========================
+**/windows/flutter/ephemeral/
+**/windows/runner/Debug/
+**/windows/runner/Profile/
+**/windows/runner/Release/
+**/linux/flutter/ephemeral/
+
+# =========================
+# Archivos de servicios (opcionales)
+# =========================
+# Firebase (mantén fuera del repo si compartes públicamente)
+**/google-services.json
+**/GoogleService-Info.plist
+
+# Variables de entorno (usa .env.example para compartir nombres)
+.env
+.env.*
+
+# =========================
+# Notas sobre pubspec.lock
+# =========================
+# Para APPS: se recomienda COMMIT del pubspec.lock (reproducibilidad).
+# Para PACKAGES (librerías publicables): se suele IGNORAR.
+# Por defecto NO lo ignoramos. Si estás creando un package, descomenta:
+# pubspec.lock
