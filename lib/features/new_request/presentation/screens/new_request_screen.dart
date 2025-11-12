@@ -11,7 +11,6 @@ class NewRequestScreen extends StatefulWidget {
 
 class _NewRequestScreenState extends State<NewRequestScreen> {
   int _currentStep = 0;
-  final PageController _pageController = PageController();
 
   // Data to be passed between steps
   String? _projectType;
@@ -25,11 +24,6 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
       setState(() {
         _currentStep++;
       });
-      _pageController.animateToPage(
-        _currentStep,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.ease,
-      );
     }
   }
 
@@ -38,11 +32,30 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
       setState(() {
         _currentStep--;
       });
-      _pageController.animateToPage(
-        _currentStep,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.ease,
-      );
+    }
+  }
+
+  Widget _buildCurrentStep() {
+    switch (_currentStep) {
+      case 0:
+        return _DetailsStep(
+          onNext: _nextPage,
+          onProjectTypeChanged: (value) => setState(() => _projectType = value),
+        );
+      case 1:
+        return _ScheduleStep(
+          onNext: _nextPage,
+          onBack: _previousPage,
+          availableDays: _availableDays,
+        );
+      case 2:
+        return _ReviewStep(
+          onBack: _previousPage,
+          projectType: _projectType,
+          availableDays: _availableDays,
+        );
+      default:
+        return Container();
     }
   }
 
@@ -66,38 +79,26 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
         ),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          _buildStepper(),
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(), // Disable swipe
-              children: [
-                _DetailsStep(
-                  onNext: _nextPage,
-                  onProjectTypeChanged: (value) => setState(() => _projectType = value),
-                ),
-                _ScheduleStep(
-                  onNext: _nextPage,
-                  onBack: _previousPage,
-                  availableDays: _availableDays,
-                ),
-                _ReviewStep(
-                  onBack: _previousPage,
-                  projectType: _projectType,
-                  availableDays: _availableDays,
-                ),
-              ],
-            ),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildStepper(),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: _buildCurrentStep(),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildStepper() {
     return Container(
+      key: ValueKey<int>(_currentStep),
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 32),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -112,7 +113,6 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
 
   Widget _buildStep({required int index, required String label}) {
     final bool isActive = _currentStep >= index;
-    final bool isCurrent = _currentStep == index;
     return Column(
       children: [
         Container(
@@ -170,8 +170,8 @@ class __DetailsStepState extends State<_DetailsStep> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
@@ -213,7 +213,6 @@ class __DetailsStepState extends State<_DetailsStep> {
             const SizedBox(height: 16),
             Text('Fotos del área (opcional)', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            // File upload area
             Container(
               height: 100,
               decoration: BoxDecoration(
@@ -254,8 +253,8 @@ class _ScheduleStep extends StatefulWidget {
 class __ScheduleStepState extends State<_ScheduleStep> {
   @override
 Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
@@ -282,7 +281,7 @@ Widget build(BuildContext context) {
               runSpacing: 10,
               children: widget.availableDays.keys.map((String key) {
                 return SizedBox(
-                  width: MediaQuery.of(context).size.width / 2 - 60,
+                  width: MediaQuery.of(context).size.width / 2 - 70,
                   child: CheckboxListTile(
                     title: Text(key, style: GoogleFonts.poppins()),
                     value: widget.availableDays[key],
@@ -345,8 +344,8 @@ class _ReviewStep extends StatelessWidget {
         .map((entry) => entry.key)
         .join(', ');
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
