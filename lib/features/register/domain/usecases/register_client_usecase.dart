@@ -7,12 +7,6 @@ class RegisterClientUseCase {
   RegisterClientUseCase(this.repository);
 
   Future<Client> call(RegisterParams params) {
-    if (!params.email.contains('@')) {
-      throw Exception('Email not valid');
-    }
-    if (params.password.length < 8) {
-      throw Exception('Password too short');
-    }
     return repository.registerClient(params);
   }
 }

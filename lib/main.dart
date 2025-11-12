@@ -25,32 +25,26 @@ import 'package:app_foryou/core/data/local/app_database.dart';
 
 // Punto de entrada principal de la aplicación.
 Future<void> main() async {
-  // 1. Asegura que los bindings de Flutter estén inicializados.
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 2. Inicializa Supabase.
   await Supabase.initialize(
     url: SupabaseConfig.supabaseUrl,
     anonKey: SupabaseConfig.supabaseAnonKey,
+    authOptions: const FlutterAuthClientOptions(
+      localStorage: EmptyLocalStorage(),
+    ),
   );
-
-  // 3. Inicia la aplicación Flutter.
   runApp(const MyApp());
 }
 
-/// Cliente global de Supabase para un fácil acceso en toda la app.
 final supabase = Supabase.instance.client;
 
-/// Widget raíz de la aplicación.
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Usamos MultiBlocProvider para proveer todos los Blocs a la aplicación.
     return MultiBlocProvider(
       providers: [
-        // Proveedor para el Bloc de Login.
         BlocProvider<LoginBloc>(
           create: (context) {
             final loginRepository = LoginRepositoryImpl(
@@ -62,7 +56,6 @@ class MyApp extends StatelessWidget {
             );
           },
         ),
-        // Proveedor para el Bloc de Registro.
         BlocProvider<RegisterBloc>(
           create: (context) => RegisterBloc(
             RegisterClientUseCase(
@@ -75,7 +68,6 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        // Proveedor para el Bloc de Perfil.
         BlocProvider<ProfileBloc>(
           create: (context) => ProfileBloc(
             getProfileUseCase: GetProfileUseCase(
@@ -92,22 +84,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        // Selección de la pantalla inicial basada en el estado de autenticación.
-        home: StreamBuilder<AuthState>(
-          stream: supabase.auth.onAuthStateChange,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SplashScreen();
-            }
-
-            final session = snapshot.data?.session;
-            if (session != null) {
-              return const HomePage();
-            } else {
-              return const LoginScreen();
-            }
-          },
-        ),
+        home: const SplashScreen(),
         routes: {
           '/login': (context) => const LoginScreen(),
           '/register': (context) => const RegisterScreen(),

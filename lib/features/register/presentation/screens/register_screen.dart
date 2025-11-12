@@ -14,26 +14,14 @@ class RegisterScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Crear Cuenta'),
       ),
-      // Usamos BlocConsumer para reaccionar a cambios de estado (ej: mostrar SnackBar)
-      // y para reconstruir la UI (ej: mostrar un spinner).
       body: BlocConsumer<RegisterBloc, RegisterState>(
         listener: (context, state) {
           if (state is RegisterSuccess) {
-            // En caso de éxito, mostramos un mensaje claro y navegamos
-            // a la pantalla que le indica al usuario que verifique su correo.
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  '¡Registro exitoso! Revisa tu correo para verificar tu cuenta.',
-                ),
-                backgroundColor: Colors.green,
-                duration: Duration(seconds: 5),
-              ),
-            );
-            // Navegamos a la pantalla de verificación.
-            Navigator.of(context).popAndPushNamed('/verify-email');
+            // En caso de éxito, se navega a la pantalla que indica al
+            // usuario que verifique su correo.
+            Navigator.of(context).pushNamedAndRemoveUntil(
+                '/verify-email', (route) => false);
           } else if (state is RegisterFailure) {
-            // En caso de fallo, mostramos el error.
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Error en el registro: ${state.error}'),
@@ -43,11 +31,9 @@ class RegisterScreen extends StatelessWidget {
           }
         },
         builder: (context, state) {
-          // Mientras se registra, mostramos un indicador de progreso.
           if (state is RegisterLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          // Por defecto, mostramos el formulario de registro.
           return const RegisterForm();
         },
       ),
@@ -55,7 +41,7 @@ class RegisterScreen extends StatelessWidget {
   }
 }
 
-/// Widget que contiene el formulario de registro.
+/// Widget que contiene el formulario de registro completo.
 class RegisterForm extends StatefulWidget {
   const RegisterForm({super.key});
 
@@ -74,7 +60,6 @@ class RegisterFormState extends State<RegisterForm> {
 
   @override
   void dispose() {
-    // Es buena práctica limpiar los controladores cuando el widget se destruye.
     _nombreController.dispose();
     _usuarioController.dispose();
     _emailController.dispose();
@@ -164,7 +149,6 @@ class RegisterFormState extends State<RegisterForm> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Si el formulario es válido, disparamos el evento al BLoC.
                 if (_formKey.currentState!.validate()) {
                   context.read<RegisterBloc>().add(
                         RegisterSubmitted(

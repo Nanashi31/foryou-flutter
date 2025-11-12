@@ -49,11 +49,9 @@ class _HomePageState extends State<HomePage> {
       ),
       body: BlocBuilder<ProfileBloc, ProfileState>(
         builder: (context, state) {
-          // Mientras se carga el perfil, mostramos un indicador de progreso.
           if (state is ProfileLoadInProgress || state is ProfileInitial) {
             return const Center(child: CircularProgressIndicator());
           }
-          // Si la carga del perfil es exitosa, mostramos el nombre.
           if (state is ProfileLoadSuccess) {
             return Center(
               child: Column(
@@ -65,24 +63,26 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    state.profile.nombre, // Usamos el nombre del perfil.
+                    state.profile.nombre,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ],
               ),
             );
           }
-          // Si hay un error, lo mostramos.
           if (state is ProfileLoadFailure) {
             return Center(
-              child: Text(
-                'Error al cargar el perfil: ${state.error}',
-                style: const TextStyle(color: Colors.red),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Error al cargar el perfil: ${state.error}',
+                  style: const TextStyle(color: Colors.red),
+                  textAlign: TextAlign.center,
+                ),
               ),
             );
           }
-          // Estado por defecto (aunque no debería llegar aquí).
-          return const Center(child: Text('Por favor, espera...'));
+          return const Center(child: Text('Estado inesperado.'));
         },
       ),
     );
