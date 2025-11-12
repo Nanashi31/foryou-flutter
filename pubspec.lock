@@ -29,12 +29,9 @@ packages:
     dependency: transitive
     description:
       name: app_links
-      sha256: "3ced568a5d9e309e99af71285666f1f3117bddd0bd5b3317979dccc1a40cada4"
+      sha256: "5f88447519add627fe1cbcab4fd1da3d4fed15b9baf29f28b22535c95ecee3e8"
       url: "https://pub.dev"
     source: hosted
-<<<<<<< HEAD
-    version: "3.5.1"
-=======
     version: "6.4.1"
   app_links_linux:
     dependency: transitive
@@ -68,7 +65,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.7"
->>>>>>> 14a722a567ebdfebee10cbc29be6c2e61ce71bb8
   args:
     dependency: transitive
     description:
@@ -361,10 +357,7 @@ packages:
       sha256: "3105dc8492f6183fb076ccf1f351ac3d60564bff92e20bfc4af9cc1651f4e7e1"
       url: "https://pub.dev"
     source: hosted
-<<<<<<< HEAD
     version: "6.0.0"
-=======
-    version: "5.0.0"
   flutter_native_splash:
     dependency: "direct main"
     description:
@@ -373,7 +366,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.7"
->>>>>>> 14a722a567ebdfebee10cbc29be6c2e61ce71bb8
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -424,24 +416,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-<<<<<<< HEAD
-  hive:
-    dependency: transitive
-    description:
-      name: hive
-      sha256: "8dcf6db979d7933da8217edcec84e9df1bdb4e4edc7fc77dbd5aa74356d6d941"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.3"
-  hive_flutter:
-    dependency: transitive
-    description:
-      name: hive_flutter
-      sha256: dca1da446b1d808a51689fb5d0c6c9510c0a2ba01e22805d492c73b68e33eecc
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.0"
-=======
   html:
     dependency: transitive
     description:
@@ -450,7 +424,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.15.6"
->>>>>>> 14a722a567ebdfebee10cbc29be6c2e61ce71bb8
   http:
     dependency: "direct main"
     description:
@@ -932,18 +905,18 @@ packages:
     dependency: "direct main"
     description:
       name: supabase
-      sha256: fc981cc5dcd9d9fcd9d7c6dd1b420be3bd9abdc317d56675f7840bb978ed2501
+      sha256: fc5bf5518f1594a0809203fa406a5094239dd1a8d090db6ebf24d6e238fcd8b3
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "2.10.0"
   supabase_flutter:
     dependency: "direct main"
     description:
       name: supabase_flutter
-      sha256: eb09e3510e5131411cfa1bdb1ab4c88f47d3604f84f265874ca472b4facfc453
+      sha256: "01fff52de41853373e1465acc2a3a3c9859a30357b84a548c3583d9ef0b02972"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "2.10.3"
   term_glyph:
     dependency: transitive
     description:

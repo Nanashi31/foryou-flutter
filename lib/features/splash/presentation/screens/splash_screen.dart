@@ -19,17 +19,14 @@ class _SplashScreenState extends State<SplashScreen> {
     // Wait for a short duration to allow the frame to build.
     await Future.delayed(Duration.zero);
 
-    // The user wants to ALWAYS start on the login screen.
-    // To ensure this, we will sign out any existing session from a previous
-    // hot-restart/debug session and then navigate to the login page.
-    try {
-      await Supabase.instance.client.auth.signOut();
-    } catch (_) {
-      // Ignore any error, the goal is to be logged out.
-    }
+    final session = Supabase.instance.client.auth.currentSession;
 
     if (mounted) {
-      Navigator.of(context).pushReplacementNamed('/login');
+      if (session != null) {
+        Navigator.of(context).pushReplacementNamed('/home');
+      } else {
+        Navigator.of(context).pushReplacementNamed('/login');
+      }
     }
   }
 

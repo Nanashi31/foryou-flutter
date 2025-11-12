@@ -31,9 +31,7 @@ class RegisterScreen extends StatelessWidget {
           }
         },
         builder: (context, state) {
-          if (state is RegisterLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+          // El formulario siempre es visible, pero el botón cambiará según el estado.
           return const RegisterForm();
         },
       ),
@@ -147,22 +145,41 @@ class RegisterFormState extends State<RegisterForm> {
               },
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  context.read<RegisterBloc>().add(
-                        RegisterSubmitted(
-                          nombre: _nombreController.text,
-                          usuario: _usuarioController.text,
-                          email: _emailController.text,
-                          password: _passwordController.text,
-                          telefono: _telefonoController.text,
-                          domicilio: _domicilioController.text,
-                        ),
-                      );
-                }
+            BlocBuilder<RegisterBloc, RegisterState>(
+              builder: (context, state) {
+                final isLoading = state is RegisterLoading;
+                return ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(50), // Botón más grande
+                  ),
+                  onPressed: isLoading
+                      ? null // Deshabilita el botón mientras se está cargando
+                      : () {
+                          if (_formKey.currentState!.validate()) {
+                            context.read<RegisterBloc>().add(
+                                  RegisterSubmitted(
+                                    nombre: _nombreController.text,
+                                    usuario: _usuarioController.text,
+                                    email: _emailController.text,
+                                    password: _passwordController.text,
+                                    telefono: _telefonoController.text,
+                                    domicilio: _domicilioController.text,
+                                  ),
+                                );
+                          }
+                        },
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text('Registrarse'),
+                );
               },
-              child: const Text('Registrarse'),
             ),
           ],
         ),
