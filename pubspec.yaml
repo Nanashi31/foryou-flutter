@@ -53,6 +53,8 @@ dependencies:
   flutter_native_splash: ^2.4.7
   google_fonts: ^6.3.2
   flutter_svg: ^2.2.2
+  table_calendar: ^3.2.0
+  image_picker: ^1.2.1
 
 dev_dependencies:
   flutter_test:

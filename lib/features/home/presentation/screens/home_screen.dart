@@ -1,3 +1,4 @@
+import 'package:app_foryou/features/new_request/presentation/screens/new_request_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -85,7 +86,12 @@ class HomeScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           ElevatedButton.icon(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const NewRequestScreen()),
+              );
+            },
             icon: const Icon(Icons.add_circle, color: Colors.white),
             label: Text(
               'Crear Proyecto',
