@@ -6,19 +6,14 @@ class ClientModel extends Client {
   final String? passwordHash;
 
   const ClientModel({
-    required String idCliente,
-    required String nombre,
-    String? usuario,
-    String? correo,
+    required super.idCliente,
+    required super.nombre,
+    super.usuario,
+    super.correo,
     this.telefono,
     this.domicilio,
     this.passwordHash,
-  }) : super(
-          idCliente: idCliente,
-          nombre: nombre,
-          usuario: usuario,
-          correo: correo,
-        );
+  });
 
   factory ClientModel.fromJson(Map<String, dynamic> json) {
     return ClientModel(

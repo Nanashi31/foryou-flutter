@@ -67,6 +67,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   void initState() {
     _authStateSubscription = supabase.auth.onAuthStateChange.listen(
       (data) {
+        if (!mounted) return;
         if (_redirecting) return;
         final session = data.session;
         if (session != null) {
@@ -77,6 +78,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
         }
       },
       onError: (error) {
+        if (!mounted) return;
         if (error is AuthException) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

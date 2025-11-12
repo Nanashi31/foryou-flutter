@@ -31,15 +31,18 @@ class _HomePageState extends State<HomePage> {
             icon: const Icon(Icons.logout),
             tooltip: 'Cerrar Sesión',
             onPressed: () async {
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+              final theme = Theme.of(context);
               try {
                 // Al cerrar sesión, el StreamBuilder en main.dart se encargará
                 // de redirigir a la pantalla de Login.
                 await Supabase.instance.client.auth.signOut();
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                if (!mounted) return;
+                scaffoldMessenger.showSnackBar(
                   SnackBar(
                     content: Text('Error al cerrar sesión: ${e.toString()}'),
-                    backgroundColor: Theme.of(context).colorScheme.error,
+                    backgroundColor: theme.colorScheme.error,
                   ),
                 );
               }

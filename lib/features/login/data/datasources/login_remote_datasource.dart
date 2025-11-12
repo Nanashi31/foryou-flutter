@@ -34,10 +34,14 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
   @override
   Future<ClientModel> login(String email, String password) async {
     try {
+      // Limpiamos los datos de entrada para evitar errores comunes.
+      final cleanEmail = email.trim().toLowerCase();
+      final cleanPassword = password.trim();
+
       // Usamos el método de Supabase para iniciar sesión con email y contraseña.
       final authResponse = await _supabase.auth.signInWithPassword(
-        email: email,
-        password: password,
+        email: cleanEmail,
+        password: cleanPassword,
       );
 
       // Si el inicio de sesión es exitoso y tenemos un usuario, procedemos.
@@ -65,7 +69,14 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
             .from('clientes')
             .select()
             .eq('id_cliente', user.id)
-            .single(); // Usamos .single() para obtener un único registro.
+            .maybeSingle(); // Usamos .maybeSingle() para evitar la excepción si no hay perfil.
+
+        if (profileResponse == null) {
+          // Si no se encuentra el perfil, es un estado inconsistente.
+          // Cerramos la sesión para evitar problemas.
+          await _supabase.auth.signOut();
+          throw Exception('No se pudo encontrar el perfil del usuario. Por favor, contacta a soporte.');
+        }
 
         // Devolvemos el perfil del cliente convertido a nuestro modelo.
         return ClientModel.fromJson(profileResponse);
@@ -76,7 +87,13 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
       }
     } on AuthException catch (e) {
       // Capturamos excepciones específicas de Supabase Auth.
-      // Devolvemos un mensaje más amigable para el usuario.
+      // Si el error es por credenciales inválidas, a menudo el problema real
+      // es que el correo del usuario no ha sido verificado.
+      if (e.message.toLowerCase().contains('invalid login credentials')) {
+        throw Exception(
+            'Credenciales inválidas. Asegúrate de que el correo y la contraseña son correctos y que el correo ha sido verificado.');
+      }
+      // Para otros errores, mostramos el mensaje original.
       throw Exception('Error de autenticación: ${e.message}');
     } catch (e) {
       // Capturamos cualquier otro error inesperado.
