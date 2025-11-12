@@ -1,5 +1,8 @@
+import 'package:app_foryou/features/new_request/data/models/solicitud_model.dart';
+import 'package:app_foryou/features/new_request/data/repositories/new_request_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class NewRequestScreen extends StatefulWidget {
@@ -13,11 +16,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
   int _currentStep = 0;
 
   // Data to be passed between steps
-  String? _projectType;
-  final Map<String, bool> _availableDays = {
-    'Lunes': false, 'Martes': false, 'Miércoles': false, 'Jueves': false,
-    'Viernes': false, 'Sábado': false, 'Domingo': false,
-  };
+  final SolicitudData _solicitudData = SolicitudData();
 
   void _nextPage() {
     if (_currentStep < 2) {
@@ -40,19 +39,18 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
       case 0:
         return _DetailsStep(
           onNext: _nextPage,
-          onProjectTypeChanged: (value) => setState(() => _projectType = value),
+          solicitudData: _solicitudData,
         );
       case 1:
         return _ScheduleStep(
           onNext: _nextPage,
           onBack: _previousPage,
-          availableDays: _availableDays,
+          solicitudData: _solicitudData,
         );
       case 2:
         return _ReviewStep(
           onBack: _previousPage,
-          projectType: _projectType,
-          availableDays: _availableDays,
+          solicitudData: _solicitudData,
         );
       default:
         return Container();
@@ -152,21 +150,39 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
   }
 }
 
+// Data class to hold all form data
+class SolicitudData {
+  String? projectType;
+  String? materialPreference;
+  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController locationController = TextEditingController();
+  final TextEditingController heightController = TextEditingController();
+  final TextEditingController widthController = TextEditingController();
+  final TextEditingController locationReferenceController = TextEditingController();
+  final Map<String, bool> availableDays = {
+    'Lunes': false, 'Martes': false, 'Miércoles': false, 'Jueves': false,
+    'Viernes': false, 'Sábado': false, 'Domingo': false,
+  };
+  DateTime? preferredDate;
+}
+
+
 class _DetailsStep extends StatefulWidget {
   final VoidCallback onNext;
-  final ValueChanged<String> onProjectTypeChanged;
-  const _DetailsStep({required this.onNext, required this.onProjectTypeChanged});
+  final SolicitudData solicitudData;
+  const _DetailsStep({required this.onNext, required this.solicitudData});
 
   @override
   __DetailsStepState createState() => __DetailsStepState();
 }
 
 class __DetailsStepState extends State<_DetailsStep> {
-  String? _selectedProjectType;
+  final _formKey = GlobalKey<FormState>();
   final List<String> _projectTypes = [
     'Rejas para ventanas', 'Portones', 'Escaleras', 'Barandales',
     'Puertas', 'Estructuras metálicas', 'Reparaciones', 'Otro'
   ];
+  final List<String> _materials = ['Acero', 'Hierro Forjado', 'Aluminio'];
 
   @override
   Widget build(BuildContext context) {
@@ -185,54 +201,95 @@ class __DetailsStepState extends State<_DetailsStep> {
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Detalles y Especificaciones', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text('Cuéntanos qué necesitas y las especificaciones', style: GoogleFonts.poppins(color: Colors.grey)),
-            const SizedBox(height: 24),
-            _buildDropdown(
-              label: 'Tipo de proyecto',
-              hint: 'Selecciona el tipo de trabajo',
-              value: _selectedProjectType,
-              items: _projectTypes,
-              onChanged: (value) {
-                setState(() {
-                  _selectedProjectType = value;
-                });
-                widget.onProjectTypeChanged(value!);
-              },
-            ),
-            _buildTextField(label: 'Descripción del proyecto', hint: 'Describe detalladamente lo que necesitas...', maxLines: 3),
-            _buildTextField(label: 'Ubicación', hint: 'Ciudad, estado', icon: Icons.location_on_outlined),
-            const SizedBox(height: 16),
-            Text('Especificaciones', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)),
-            _buildTextField(label: 'Medidas aproximadas', hint: 'Ej: 2m x 1.5m'),
-            _buildDropdown(label: 'Preferencia de materiales', hint: 'Selecciona el material', items: ['Acero', 'Hierro Forjado', 'Aluminio']),
-            const SizedBox(height: 16),
-            Text('Fotos del área (opcional)', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Container(
-              height: 100,
-              decoration: BoxDecoration(
-                color: Colors.grey[50],
-                border: Border.all(color: Colors.grey[300]!),
-                borderRadius: BorderRadius.circular(12),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Detalles y Especificaciones', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Text('Cuéntanos qué necesitas y las especificaciones', style: GoogleFonts.poppins(color: Colors.grey)),
+              const SizedBox(height: 24),
+              _buildDropdown(
+                label: 'Tipo de proyecto',
+                hint: 'Selecciona el tipo de trabajo',
+                value: widget.solicitudData.projectType,
+                items: _projectTypes,
+                onChanged: (value) => setState(() => widget.solicitudData.projectType = value),
+                validator: (value) => value == null ? 'Por favor selecciona un tipo de proyecto' : null,
               ),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.file_upload_outlined, color: Colors.grey[400], size: 40),
-                    Text('Toca para subir fotos del área', style: GoogleFonts.poppins(color: Colors.grey)),
-                  ],
+              _buildTextField(
+                controller: widget.solicitudData.descriptionController,
+                label: 'Descripción del proyecto',
+                hint: 'Describe detalladamente lo que necesitas...',
+                maxLines: 3,
+                validator: (value) => value == null || value.isEmpty ? 'Por favor describe tu proyecto' : null,
+              ),
+              _buildTextField(
+                controller: widget.solicitudData.locationController,
+                label: 'Ubicación',
+                hint: 'Ciudad, estado',
+                icon: Icons.location_on_outlined,
+                validator: (value) => value == null || value.isEmpty ? 'Por favor ingresa tu ubicación' : null,
+              ),
+              const SizedBox(height: 16),
+              Text('Especificaciones', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildTextField(
+                      controller: widget.solicitudData.heightController,
+                      label: 'Alto (m)',
+                      hint: 'Ej: 2.5',
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildTextField(
+                      controller: widget.solicitudData.widthController,
+                      label: 'Ancho (m)',
+                      hint: 'Ej: 1.8',
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    ),
+                  ),
+                ],
+              ),
+              _buildDropdown(
+                label: 'Preferencia de materiales',
+                hint: 'Selecciona el material',
+                items: _materials,
+                value: widget.solicitudData.materialPreference,
+                onChanged: (value) => setState(() => widget.solicitudData.materialPreference = value),
+              ),
+              const SizedBox(height: 16),
+              Text('Fotos del área (opcional)', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Container(
+                height: 100,
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  border: Border.all(color: Colors.grey[300]!),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.file_upload_outlined, color: Colors.grey[400], size: 40),
+                      Text('Toca para subir fotos del área', style: GoogleFonts.poppins(color: Colors.grey)),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
-            _buildNextButton(onPressed: widget.onNext),
-          ],
+              const SizedBox(height: 24),
+              _buildNextButton(onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  widget.onNext();
+                }
+              }),
+            ],
+          ),
         ),
       ),
     );
@@ -242,9 +299,9 @@ class __DetailsStepState extends State<_DetailsStep> {
 class _ScheduleStep extends StatefulWidget {
   final VoidCallback onNext;
   final VoidCallback onBack;
-  final Map<String, bool> availableDays;
+  final SolicitudData solicitudData;
 
-  const _ScheduleStep({required this.onNext, required this.onBack, required this.availableDays});
+  const _ScheduleStep({required this.onNext, required this.onBack, required this.solicitudData});
 
   @override
   __ScheduleStepState createState() => __ScheduleStepState();
@@ -252,7 +309,7 @@ class _ScheduleStep extends StatefulWidget {
 
 class __ScheduleStepState extends State<_ScheduleStep> {
   @override
-Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       child: Container(
@@ -279,15 +336,15 @@ Widget build(BuildContext context) {
             Wrap(
               spacing: 10,
               runSpacing: 10,
-              children: widget.availableDays.keys.map((String key) {
+              children: widget.solicitudData.availableDays.keys.map((String key) {
                 return SizedBox(
                   width: MediaQuery.of(context).size.width / 2 - 70,
                   child: CheckboxListTile(
                     title: Text(key, style: GoogleFonts.poppins()),
-                    value: widget.availableDays[key],
+                    value: widget.solicitudData.availableDays[key],
                     onChanged: (bool? value) {
                       setState(() {
-                        widget.availableDays[key] = value!;
+                        widget.solicitudData.availableDays[key] = value!;
                       });
                     },
                     controlAffinity: ListTileControlAffinity.leading,
@@ -299,9 +356,15 @@ Widget build(BuildContext context) {
             const SizedBox(height: 24),
             Text('Fecha preferida para la cita', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
             TableCalendar(
-              firstDay: DateTime.utc(2020, 1, 1),
-              lastDay: DateTime.utc(2030, 12, 31),
-              focusedDay: DateTime.now(),
+              firstDay: DateTime.now(),
+              lastDay: DateTime.now().add(const Duration(days: 365)),
+              focusedDay: widget.solicitudData.preferredDate ?? DateTime.now(),
+              selectedDayPredicate: (day) => isSameDay(widget.solicitudData.preferredDate, day),
+              onDaySelected: (selectedDay, focusedDay) {
+                setState(() {
+                  widget.solicitudData.preferredDate = selectedDay;
+                });
+              },
               calendarFormat: CalendarFormat.month,
               headerStyle: HeaderStyle(
                 titleCentered: true,
@@ -314,7 +377,12 @@ Widget build(BuildContext context) {
               ),
             ),
             const SizedBox(height: 24),
-            _buildTextField(label: 'Referencias de ubicación', hint: 'Ej: Casa azul con portón blanco...', maxLines: 3),
+            _buildTextField(
+              controller: widget.solicitudData.locationReferenceController,
+              label: 'Referencias de ubicación',
+              hint: 'Ej: Casa azul con portón blanco...',
+              maxLines: 3
+            ),
             const SizedBox(height: 24),
             Row(
               children: [
@@ -332,14 +400,13 @@ Widget build(BuildContext context) {
 
 class _ReviewStep extends StatelessWidget {
   final VoidCallback onBack;
-  final String? projectType;
-  final Map<String, bool> availableDays;
+  final SolicitudData solicitudData;
 
-  const _ReviewStep({required this.onBack, this.projectType, required this.availableDays});
+  const _ReviewStep({required this.onBack, required this.solicitudData});
 
   @override
   Widget build(BuildContext context) {
-    final selectedDays = availableDays.entries
+    final selectedDays = solicitudData.availableDays.entries
         .where((entry) => entry.value)
         .map((entry) => entry.key)
         .join(', ');
@@ -368,11 +435,11 @@ class _ReviewStep extends StatelessWidget {
             const SizedBox(height: 24),
             Text('Resumen de tu solicitud', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
-            _buildReviewItem('Tipo de proyecto:', projectType ?? 'No especificado'),
-            _buildReviewItem('Descripción:', 'No especificada'),
-            _buildReviewItem('Ubicación:', 'No especificada'),
-            _buildReviewItem('Medidas:', 'No especificadas'),
-            _buildReviewItem('Material:', 'No especificado'),
+            _buildReviewItem('Tipo de proyecto:', solicitudData.projectType ?? 'No especificado'),
+            _buildReviewItem('Descripción:', solicitudData.descriptionController.text.isNotEmpty ? solicitudData.descriptionController.text : 'No especificada'),
+            _buildReviewItem('Ubicación:', solicitudData.locationController.text.isNotEmpty ? solicitudData.locationController.text : 'No especificada'),
+            _buildReviewItem('Medidas:', 'Alto: ${solicitudData.heightController.text.isNotEmpty ? solicitudData.heightController.text : "N/A"}m, Ancho: ${solicitudData.widthController.text.isNotEmpty ? solicitudData.widthController.text : "N/A"}m'),
+            _buildReviewItem('Material:', solicitudData.materialPreference ?? 'No especificado'),
             _buildReviewItem('Días disponibles:', selectedDays.isNotEmpty ? selectedDays : 'No especificados'),
             const SizedBox(height: 24),
             Container(
@@ -403,10 +470,54 @@ class _ReviewStep extends StatelessWidget {
                       ),
                     ),
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Submit logic
-                      },
-                      style: ElevatedButton.styleFrom(
+                                            onPressed: () async {
+                                              final supabase = Supabase.instance.client;
+                                              final currentUser = supabase.auth.currentUser;
+                      
+                                              if (currentUser == null) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text('Error: No hay un usuario autenticado.')),
+                                                );
+                                                return;
+                                              }
+                      
+                                              // 1. Parse height and width, handle potential nulls
+                                              final double? height = double.tryParse(solicitudData.heightController.text);
+                                              final double? width = double.tryParse(solicitudData.widthController.text);
+                      
+                                              // 2. Create the main solicitud model
+                                              final solicitud = SolicitudModel(
+                                                idCliente: currentUser.id,
+                                                direccion: solicitudData.locationController.text,
+                                                descripcion: solicitudData.descriptionController.text,
+                                                tipoProyecto: solicitudData.projectType ?? 'No especificado',
+                                                materiales: solicitudData.materialPreference ?? 'No especificado',
+                                                diasDisponibles: selectedDays,
+                                                fechaCita: solicitudData.preferredDate ?? DateTime.now(),
+                                              );
+                      
+                                              // 3. Get repository
+                                              final repository = NewRequestRepository(supabase);
+                      
+                                              try {
+                                                // 4. Call the new repository method
+                                                await repository.createRequest(
+                                                  solicitud: solicitud,
+                                                  height: height,
+                                                  width: width,
+                                                );
+                      
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text('Solicitud enviada con éxito!')),
+                                                );
+                                                Navigator.of(context).popUntil((route) => route.isFirst);
+                                              } catch (e) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(content: Text('Error al enviar la solicitud: $e')),
+                                                );
+                                              }
+                                            },
+                                            style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -426,7 +537,15 @@ class _ReviewStep extends StatelessWidget {
 
 // Helper Widgets
 
-Widget _buildTextField({required String label, required String hint, int maxLines = 1, IconData? icon}) {
+Widget _buildTextField({
+  required String label,
+  required String hint,
+  TextEditingController? controller,
+  int maxLines = 1,
+  IconData? icon,
+  String? Function(String?)? validator,
+  TextInputType? keyboardType,
+}) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 8.0),
     child: Column(
@@ -435,7 +554,9 @@ Widget _buildTextField({required String label, required String hint, int maxLine
         Text(label, style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         TextFormField(
+          controller: controller,
           maxLines: maxLines,
+          keyboardType: keyboardType,
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: GoogleFonts.poppins(),
@@ -447,13 +568,21 @@ Widget _buildTextField({required String label, required String hint, int maxLine
             ),
             prefixIcon: icon != null ? Icon(icon) : null,
           ),
+          validator: validator,
         ),
       ],
     ),
   );
 }
 
-Widget _buildDropdown({required String label, required String hint, String? value, required List<String> items, ValueChanged<String?>? onChanged}) {
+Widget _buildDropdown({
+  required String label,
+  required String hint,
+  String? value,
+  required List<String> items,
+  ValueChanged<String?>? onChanged,
+  String? Function(String?)? validator,
+}) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 8.0),
     child: Column(
@@ -480,6 +609,7 @@ Widget _buildDropdown({required String label, required String hint, String? valu
               borderSide: BorderSide.none,
             ),
           ),
+          validator: validator,
         ),
       ],
     ),
