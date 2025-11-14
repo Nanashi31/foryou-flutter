@@ -41,11 +41,7 @@ class LoginScreenState extends State<LoginScreen> {
               ),
             );
           } else if (state is LoginSuccess) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (_) => const LoginSuccessScreen(),
-              ),
-            );
+            Navigator.of(context).pushReplacementNamed('/home');
           } else if (state is LoginOtpLinkSent) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(

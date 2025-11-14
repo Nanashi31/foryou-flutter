@@ -12,7 +12,7 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
   @override
   Future<ClientModel> registerClient(RegisterParams params) async {
     try {
-      // Paso 1: Registrar el usuario en Supabase Auth, solo con email y contraseña.
+      // Step 1: Sign up the user in Supabase Auth.
       final authResponse = await _supabase.auth.signUp(
         email: params.email,
         password: params.password,
@@ -25,44 +25,36 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
 
       final user = authResponse.user!;
 
-      // Paso 2: Insertar explícitamente el perfil en la tabla 'clientes'.
-      // Esto es más robusto y fiable que depender de un trigger en la base de datos.
+      // Step 2: Update the profile in 'clientes' and select it in one atomic operation.
+      // The trigger 'on_auth_user_created' should have already created a row.
+      // We just need to fill in the rest of the details.
       final profileData = {
-        'id_cliente': user.id, // Vincula el perfil con el usuario de auth.
         'nombre': params.nombre,
         'usuario': params.usuario,
-        'correo': params.email,
         'telefono': params.telefono,
         'domicilio': params.domicilio,
       };
 
-      // Usamos .insert() para crear el registro.
-      await _supabase.from('clientes').insert(profileData);
-
-      // Ahora, recupera el perfil que acabamos de insertar para devolverlo.
-      // Usamos .single() porque sabemos que debe existir exactamente un perfil.
-      final newProfile = await _supabase
+      // Use a chained query to update and then immediately select the updated row.
+      final updatedProfile = await _supabase
           .from('clientes')
-          .select()
+          .update(profileData)
           .eq('id_cliente', user.id)
+          .select()
           .single();
 
-      // Devolvemos el perfil del cliente recién creado y parseado a nuestro modelo.
-      return ClientModel.fromJson(newProfile);
+      return ClientModel.fromJson(updatedProfile);
 
     } on AuthException catch (e) {
-      // Manejo de errores de autenticación, como un usuario ya existente.
       if (e.message.toLowerCase().contains('user already registered')) {
         throw Exception('Esta cuenta ya esta registrada. Intentelo de nuevo.');
       }
       throw Exception('Error de autenticación durante el registro: ${e.message}');
     } on PostgrestException catch (e) {
-      // Manejo de errores de la base de datos, por si falla la inserción del perfil.
-      // En un futuro, se podría añadir lógica para eliminar el usuario de auth si esto falla.
+      // This error now strongly implies a missing or incorrect RLS policy.
       throw Exception(
           'La cuenta fue creada, pero falló al guardar el perfil: ${e.message}');
     } catch (e) {
-      // Captura de cualquier otro error inesperado.
       throw Exception(
           'Ocurrió un error inesperado durante el registro: ${e.toString()}');
     }

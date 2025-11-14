@@ -17,8 +17,8 @@ class ClientModel extends Client {
 
   factory ClientModel.fromJson(Map<String, dynamic> json) {
     return ClientModel(
-      idCliente: json['id_cliente'],
-      nombre: json['nombre'],
+      idCliente: json['id_cliente'] ?? '',
+      nombre: json['nombre'] ?? '',
       usuario: json['usuario'],
       correo: json['correo'],
       telefono: json['telefono'],

@@ -1,0 +1,14 @@
+alter policy "Los usuarios pueden insertar su propio perfil."
+
+
+on "public"."clientes"
+
+
+to public
+
+
+with check (
+@
+  (auth.uid() = id_cliente)
+
+);
