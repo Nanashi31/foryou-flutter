@@ -1,6 +1,6 @@
 import 'package:app_foryou/features/new_request/presentation/screens/new_request_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+
 import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -42,12 +42,8 @@ class HomeScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              SvgPicture.string(
-                '''<svg fill="none" height="28" viewBox="0 0 32 32" width="28" xmlns="http://www.w3.org/2000/svg">
-                <path d="M11.5379 3.55554L21.5034 10.3333V31.1111H11.5379V3.55554Z" fill="#6A0DAD"></path>
-                <path d="M25.8621 13.4445L15.8966 20.2222V31.1111H25.8621V13.4445Z" fill="#6A0DAD"></path>
-                <path d="M6.20691 13.4445L16.1724 6.66669V0.888916H6.20691V13.4445Z" fill="#8A2BE2"></path>
-                </svg>''',
+              Image.asset(
+                'assets/icons/logo.png',
                 width: 28,
                 height: 28,
               ),
