@@ -1,25 +1,27 @@
 @echo off
 REM ============================================================
-REM  setup_assets_icons_splash.bat
+REM  setup_icons_splash.bat
 REM  Objetivo:
-REM   - Asegurar estructura assets\icons
-REM   - Mover icono.jpg (si está en la raíz) -> assets\icons\icono.jpg
-REM   - Agregar dependencias y configuraciones:
-REM       * flutter_launcher_icons (iconos del app)
-REM       * flutter_native_splash (splash screen)
-REM   - Escribir bloques de config al FINAL del pubspec.yaml (nivel raíz)
-REM     sin tocar secciones de dependencies/dev_dependencies.
+REM   - Asegurar estructura de assets para icono y splash:
+REM       * assets\icons\icono.jpg  -> launcher icon
+REM       * assets\splash\splash.jpg -> splash screen
+REM   - Agregar dependencias:
+REM       * flutter_launcher_icons
+REM       * flutter_native_splash
+REM   - Configurar bloques en pubspec.yaml (nivel raiz) SOLO para Android:
+REM       * flutter_launcher_icons
+REM       * flutter_native_splash
 REM   - Ejecutar:
 REM       1) flutter pub get
 REM       2) dart run flutter_launcher_icons
 REM       3) dart run flutter_native_splash:create
 REM       4) flutter run
 REM
-REM  Notas de diseño del splash:
+REM  Diseño splash:
 REM   - Solo Android
-REM   - Fondo blanco
-REM   - Misma imagen para Android 12+
-REM   - Ruta de imagen: assets/icons/icono.jpg
+REM   - Fondo blanco (#ffffff)
+REM   - Imagen de splash: assets/splash/splash.jpg
+REM   - Android 12 usa la misma imagen y color
 REM ============================================================
 
 setlocal EnableExtensions EnableDelayedExpansion
@@ -34,16 +36,20 @@ if not exist "pubspec.yaml" (
 echo [INFO] Inicio: %DATE% %TIME%
 
 REM ------------------------------------------------------------
-REM PASO 0) Preparar carpetas e imagen
-REM   - Crear assets\icons
-REM   - Si existe icono.jpg en la raiz, moverlo a assets\icons\icono.jpg
+REM PASO 0) Preparar carpetas e imagenes
+REM   - Crear assets\icons y assets\splash
+REM   - Mover:
+REM       icono.jpg  (raiz) -> assets\icons\icono.jpg
+REM       splash.jpg (raiz) -> assets\splash\splash.jpg
 REM ------------------------------------------------------------
 echo.
-echo [PASO 0] Preparando estructura de assets\icons y moviendo icono.jpg (si aplica)
+echo [PASO 0] Preparando estructura de assets (icons y splash) y moviendo imagenes
 
+REM Crear carpetas necesarias
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-  "New-Item -ItemType Directory -Path 'assets\icons' -Force | Out-Null;"
+  "New-Item -ItemType Directory -Path 'assets\icons' -Force | Out-Null; New-Item -ItemType Directory -Path 'assets\splash' -Force | Out-Null;"
 
+REM Mover icono.jpg -> assets\icons\icono.jpg
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "$src = 'icono.jpg';" ^
   "$dst = 'assets\icons\icono.jpg';" ^
@@ -58,9 +64,28 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "  Write-Host '[INFO] No se encontro icono.jpg en la raiz; continuando...';" ^
   "}"
 
+REM Mover splash.jpg -> assets\splash\splash.jpg
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "$src = 'splash.jpg';" ^
+  "$dst = 'assets\splash\splash.jpg';" ^
+  "if (Test-Path $src) {" ^
+  "  if (Test-Path $dst) {" ^
+  "    Write-Host '[INFO] Ya existe ' $dst ' ; no se sobreescribe.';" ^
+  "  } else {" ^
+  "    Move-Item -LiteralPath $src -Destination $dst;" ^
+  "    Write-Host '[OK] Movido ' $src ' -> ' $dst;" ^
+  "  }" ^
+  "} else {" ^
+  "  Write-Host '[INFO] No se encontro splash.jpg en la raiz; continuando...';" ^
+  "}"
+
+REM Avisos
 if not exist "assets\icons\icono.jpg" (
-  echo [AVISO] No se encontro assets\icons\icono.jpg tras el paso 0.
-  echo        Coloca tu icono ahi para evitar errores al generar splash/iconos.
+  echo [AVISO] No se encontro assets\icons\icono.jpg (icono para launcher).
+)
+
+if not exist "assets\splash\splash.jpg" (
+  echo [AVISO] No se encontro assets\splash\splash.jpg (imagen para splash).
 )
 
 REM ------------------------------------------------------------
@@ -77,7 +102,6 @@ if errorlevel 1 (
 
 REM ------------------------------------------------------------
 REM PASO 1.1) flutter pub add flutter_native_splash
-REM   (Dependencia para generar splash en Android con la misma imagen)
 REM ------------------------------------------------------------
 echo.
 echo [PASO 1.1] Ejecutando: flutter pub add flutter_native_splash
@@ -89,9 +113,9 @@ if errorlevel 1 (
 )
 
 REM ------------------------------------------------------------
-REM PASO 2) Asegurar bloque de configuracion de flutter_launcher_icons
-REM   - Solo si NO existe ya un bloque raiz 'flutter_launcher_icons:'
-REM   - Ruta de imagen: assets/icons/icono.jpg
+REM PASO 2) Configuracion flutter_launcher_icons en pubspec.yaml
+REM   - Solo si NO existe bloque raiz 'flutter_launcher_icons:'
+REM   - Usa assets/icons/icono.jpg
 REM ------------------------------------------------------------
 echo.
 echo [PASO 2] Configurando bloque flutter_launcher_icons en pubspec.yaml
@@ -114,9 +138,10 @@ if errorlevel 1 (
 )
 
 REM ------------------------------------------------------------
-REM PASO 2.1) Asegurar bloque de configuracion de flutter_native_splash
-REM   - Solo Android, fondo blanco, misma imagen para Android 12+
-REM   - Solo si NO existe ya un bloque raiz 'flutter_native_splash:'
+REM PASO 2.1) Configuracion flutter_native_splash en pubspec.yaml
+REM   - Solo Android, fondo blanco, splash separado
+REM   - Usa assets/splash/splash.jpg y Android 12 igual
+REM   - Solo si NO existe bloque raiz 'flutter_native_splash:'
 REM ------------------------------------------------------------
 echo.
 echo [PASO 2.1] Configurando bloque flutter_native_splash en pubspec.yaml
@@ -128,7 +153,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "if ($hasRootSplash) {" ^
   "  Write-Host '[INFO] Ya existe flutter_native_splash: en el pubspec. No se duplica.';" ^
   "} else {" ^
-  "  $block = \"`r`nflutter_native_splash:`r`n  android: true`r`n  ios: false`r`n  web: false`r`n  color: \"\"#ffffff\"\"`r`n  image: \"\"assets/icons/icono.jpg\"\"`r`n  android_12:`r`n    image: \"\"assets/icons/icono.jpg\"\"`r`n    color: \"\"#ffffff\"\"\";" ^
+  "  $block = \"`r`nflutter_native_splash:`r`n  android: true`r`n  ios: false`r`n  web: false`r`n  color: \"\"#ffffff\"\"`r`n  image: \"\"assets/splash/splash.jpg\"\"`r`n  android_12:`r`n    image: \"\"assets/splash/splash.jpg\"\"`r`n    color: \"\"#ffffff\"\"\";" ^
   "  Add-Content -Path $path -Value $block;" ^
   "  Write-Host '[OK] Bloque flutter_native_splash agregado al FINAL del pubspec.yaml';" ^
   "}"
@@ -165,7 +190,6 @@ if errorlevel 1 (
 
 REM ------------------------------------------------------------
 REM PASO 4.1) Generar SPLASH
-REM   - Usa el bloque flutter_native_splash del pubspec.yaml
 REM ------------------------------------------------------------
 echo.
 echo [PASO 4.1] Ejecutando: dart run flutter_native_splash:create
